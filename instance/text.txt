@@ -1,0 +1,64 @@
+Не забываем пробросить порты в VirtualBox основной->гостевой 10022 -> 22 80 -> 80
+
+sudo dpkg --configure -a
+sudo nano /etc/apt/sources.list
+sudo apt update 
+sudo apt upgrade -y
+sudo apt install nginx -y
+sudo nano /etc/nginx/sites-available/your_project
+
+server {
+    listen 80;
+
+    server_name your_domain_or_ip;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+sudo ln -s /etc/nginx/sites-available/your_project /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx
+git clone https://github.com/iamRuda/ExamAdmin.git
+cd ExamAdmin
+sudo mkdir -p /var/www/app
+sudo chmod -R 755 /var/www/app
+sudo cp -r ExamAdmin/* /var/www/app/
+sudo apt install python3.11-venv
+python3 -m venv venv
+source venv/bin/activate
+pip install -U Flask Flask-SQLAlchemy
+sudo nano /etc/systemd/system/your_project.service
+
+[Unit]
+Description=Flask instance to serve your_project
+After=network.target
+
+[Service]
+User=ruda
+Group=www-data
+WorkingDirectory=/home/ruda/ExamAdmin
+Environment="PATH=/home/ruda/ExamAdmin/venv/bin"
+ExecStart=/home/ruda/ExamAdmin/venv/bin/python /home/ruda/ExamAdmin/your_app_file.py
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+sudo systemctl start your_project
+sudo systemctl enable your_project
+sudo systemctl status your_project
+
+sudo apt install lynx
+sudo ufw allow 80/tcp
+ip addr show
+
+sudo history > commands_history.txt
+cat commands_history.txt
